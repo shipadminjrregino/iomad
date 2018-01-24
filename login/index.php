@@ -378,9 +378,18 @@ if (isloggedin() and !isguestuser()) {
     echo $OUTPUT->confirm(get_string('alreadyloggedin', 'error', fullname($USER)), $logout, $continue);
     echo $OUTPUT->box_end();
 } else {
-    $loginform = new \core_auth\output\login($authsequence, $frm->username);
+
+    $hostname = isset($_SERVER['HTTP_X_FORWARDED_HOST']) ?  
+              $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'];
+    $companyname = company::get_companyname_byhostname($hostname);
+    
+    $loginform = new \core_auth\output\login($authsequence, $frm->username, $companyname);
     $loginform->set_error($errormsg);
     echo $OUTPUT->render($loginform);
 }
 
+
+
 echo $OUTPUT->footer();
+
+

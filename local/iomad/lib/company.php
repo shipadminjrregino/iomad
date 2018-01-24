@@ -198,6 +198,23 @@ class company {
         return $DB->get_recordset('company', null, 'name', '*', $page, $perpage);
     }
 
+    public static function get_companyname_byhostname($hostname) {
+        global $DB;
+
+        $inputcompanyname = substr($hostname, 0, strpos($hostname, '.'));
+        
+        $companyname = null;
+        $companies = $DB->get_recordset('company', null, 'name', 'name');
+        foreach ($companies as $company) {
+            if (strcasecmp(str_replace(' ', '', $company->name), $inputcompanyname) == 0) {
+                $companyname = $company->name;
+                break;
+            }
+        }
+
+        return $companyname;
+    }
+
     /**
      * Creates an array of companies to be used in a Select menu
      *

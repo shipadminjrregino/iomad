@@ -462,8 +462,15 @@ class core_renderer extends \core_renderer {
         if ($url) {
             $url = $url->out(false);
         }
-        $context->logourl = $url;
-        $context->sitename = format_string($SITE->fullname, true, ['context' => context_course::instance(SITEID), "escape" => false]);
+        
+        //$context->logourl = $url;
+        //$context->sitename = format_string($SITE->fullname, true, ['context' => context_course::instance(SITEID), "escape" => false]);
+        
+        if ($context->companyname) {
+            $context->sitename = $context->companyname;
+        } else {
+            $context->logourl = $url;      
+        }
 
         return $this->render_from_template('core/login', $context);
     }

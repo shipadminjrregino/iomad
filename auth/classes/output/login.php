@@ -70,6 +70,8 @@ class login implements renderable, templatable {
     public $signupurl;
     /** @var string The user name to pre-fill the form with. */
     public $username;
+    /** @var string The company name to pre-fill the form with. */
+    public $companyname;
 
     /**
      * Constructor.
@@ -77,10 +79,11 @@ class login implements renderable, templatable {
      * @param array $authsequence The enabled sequence of authentication plugins.
      * @param string $username The username to display.
      */
-    public function __construct(array $authsequence, $username = '') {
+    public function __construct(array $authsequence, $username = '', $companyname = '') {
         global $CFG, $SESSION;
 
         $this->username = $username;
+        $this->companyname = $companyname;
 
         $this->canloginasguest = $CFG->guestloginbutton and !isguestuser();
         $this->canloginbyemail = !empty($CFG->authloginviaemail);
@@ -136,6 +139,7 @@ class login implements renderable, templatable {
         $data->rememberusername = $this->rememberusername;
         $data->signupurl = $this->signupurl->out(false);
         $data->username = $this->username;
+        $data->companyname = $this->companyname;
 
         return $data;
     }
