@@ -4209,7 +4209,7 @@ function guest_user() {
  * @param int $failurereason login failure reason, can be used in renderers (it may disclose if account exists)
  * @return stdClass|false A {@link $USER} object or false if error
  */
-function authenticate_user_login($username, $password, $ignorelockout=false, &$failurereason=null) {
+function authenticate_user_login($username, $password, $ignorelockout=false, &$failurereason=null, $companyid=0) {
     global $CFG, $DB;
     require_once("$CFG->libdir/authlib.php");
 
@@ -4234,6 +4234,24 @@ function authenticate_user_login($username, $password, $ignorelockout=false, &$f
     $authsenabled = get_enabled_auth_plugins();
 
     if ($user) {
+		
+		// Check if user belongs to the company
+		if ($companyid) {
+			$select = 'userid = :userid';
+			$params = array('userid' => $user->id);
+	    	$usercompanies = $DB->get_records_select('company_users', $select, $params, 'id', 'id', 0, 2);
+	    	
+	    	if (count($usercompanies) === 1) {
+	        	$usercompany = reset($usercompanies);
+	        	if ($usercompany->id != $companyid) {
+	        		return false;
+	        	}
+	        } else {
+	        	return false;
+	        }
+	        unset($usercompanies);
+		}
+
         // Use manual if auth not set.
         $auth = empty($user->auth) ? 'manual' : $user->auth;
 

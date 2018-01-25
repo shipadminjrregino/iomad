@@ -198,21 +198,24 @@ class company {
         return $DB->get_recordset('company', null, 'name', '*', $page, $perpage);
     }
 
-    public static function get_companyname_byhostname($hostname) {
+    public static function get_company_byhostname($hostname) {
         global $DB;
 
         $inputcompanyname = substr($hostname, 0, strpos($hostname, '.'));
-        
-        $companyname = null;
-        $companies = $DB->get_recordset('company', null, 'name', 'name');
-        foreach ($companies as $company) {
-            if (strcasecmp(str_replace(' ', '', $company->name), $inputcompanyname) == 0) {
-                $companyname = $company->name;
+        if (!$inputcompanyname) {
+            return null;
+        }
+
+        $company = null;
+        $companies = $DB->get_recordset('company', null, 'name', 'id, name');
+        foreach ($companies as $currentcompany) {
+            if (strcasecmp(str_replace(' ', '', $currentcompany->name), $inputcompanyname) == 0) {
+                $company = $currentcompany;                
                 break;
             }
         }
 
-        return $companyname;
+        return $company;
     }
 
     /**

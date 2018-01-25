@@ -130,6 +130,10 @@ if ($anchor && isset($SESSION->wantsurl) && strpos($SESSION->wantsurl, '#') === 
     $SESSION->wantsurl = $wantsurl->out();
 }
 
+// Hostname
+$hostname = isset($_SERVER['HTTP_X_FORWARDED_HOST']) ?  
+            $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'];
+
 /// Check if the user has actually submitted login data to us
 
 if ($frm and isset($frm->username)) {                             // Login WITH cookies
@@ -151,7 +155,13 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
         $frm = false;
     } else {
         if (empty($errormsg)) {
-            $user = authenticate_user_login($frm->username, $frm->password, false, $errorcode);
+
+            // Get company data from url
+            // Used for validating user if url is company issued
+            // Users can only login with their own issued company url
+            $company = company::get_company_byhostname($hostname);
+            $failurereason = null;
+            $user = authenticate_user_login($frm->username, $frm->password, false, $failurereason, $company->id);
         }
     }
 
@@ -377,13 +387,13 @@ if (isloggedin() and !isguestuser()) {
     $continue = new single_button(new moodle_url($CFG->httpswwwroot.'/login/index.php', array('cancel'=>1)), get_string('cancel'), 'get');
     echo $OUTPUT->confirm(get_string('alreadyloggedin', 'error', fullname($USER)), $logout, $continue);
     echo $OUTPUT->box_end();
-} else {
+} else {    
 
-    $hostname = isset($_SERVER['HTTP_X_FORWARDED_HOST']) ?  
-              $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'];
-    $companyname = company::get_companyname_byhostname($hostname);
-    
-    $loginform = new \core_auth\output\login($authsequence, $frm->username, $companyname);
+    // Get company data from url
+    // Used for customizing the site by issued company url
+    $company = company::get_company_byhostname($hostname);
+
+    $loginform = new \core_auth\output\login($authsequence, $frm->username, $company->name);
     $loginform->set_error($errormsg);
     echo $OUTPUT->render($loginform);
 }
