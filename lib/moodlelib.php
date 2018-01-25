@@ -4239,11 +4239,11 @@ function authenticate_user_login($username, $password, $ignorelockout=false, &$f
 		if ($companyid) {
 			$select = 'userid = :userid';
 			$params = array('userid' => $user->id);
-	    	$usercompanies = $DB->get_records_select('company_users', $select, $params, 'id', 'id', 0, 2);
+	    	$usercompanies = $DB->get_records_select('company_users', $select, $params, 'id', 'companyid', 0, 1);
 	    	
 	    	if (count($usercompanies) === 1) {
 	        	$usercompany = reset($usercompanies);
-	        	if ($usercompany->id != $companyid) {
+	        	if ($usercompany->companyid != $companyid) {
 	        		return false;
 	        	}
 	        } else {
