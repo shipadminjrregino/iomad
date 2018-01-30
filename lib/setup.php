@@ -460,6 +460,11 @@ global $SESSION;
 global $USER;
 
 /**
+ * Current company record
+ */
+global $COMPANY;
+
+/**
  * Frontpage course record
  */
 global $SITE;

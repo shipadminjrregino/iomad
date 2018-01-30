@@ -39,7 +39,7 @@ class block_online_users extends block_base {
     }
 
     function get_content() {
-        global $USER, $CFG, $DB, $OUTPUT;
+        global $USER, $CFG, $DB, $OUTPUT, $COMPANY;
 
         if ($this->content !== NULL) {
             return $this->content;
@@ -70,7 +70,7 @@ class block_online_users extends block_base {
         $sitelevel = $this->page->course->id == SITEID || $this->page->context->contextlevel < CONTEXT_COURSE;
 
         $onlineusers = new fetcher($currentgroup, $now, $timetoshowusers, $this->page->context,
-                $sitelevel, $this->page->course->id);
+                $sitelevel, $this->page->course->id, $COMPANY->id);
 
         //Calculate minutes
         $minutes  = floor($timetoshowusers/60);

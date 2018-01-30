@@ -52,8 +52,8 @@ class fetcher {
      * @param bool $sitelevel Whether to check online users at site level.
      * @param int $courseid The course id to check
      */
-    public function __construct($currentgroup, $now, $timetoshowusers, $context, $sitelevel = true, $courseid = null) {
-        $this->set_sql($currentgroup, $now, $timetoshowusers, $context, $sitelevel, $courseid);
+    public function __construct($currentgroup, $now, $timetoshowusers, $context, $sitelevel = true, $courseid = null, $companyid = 0) {
+        $this->set_sql($currentgroup, $now, $timetoshowusers, $context, $sitelevel, $courseid, $companyid);
     }
 
     /**
@@ -66,7 +66,7 @@ class fetcher {
      * @param bool $sitelevel Whether to check online users at site level.
      * @param int $courseid The course id to check
      */
-    protected function set_sql($currentgroup, $now, $timetoshowusers, $context, $sitelevel, $courseid) {
+    protected function set_sql($currentgroup, $now, $timetoshowusers, $context, $sitelevel, $courseid, $companyid) {
         $timefrom = 100 * floor(($now - $timetoshowusers) / 100); // Round to nearest 100 seconds for better query cache.
 
         $groupmembers = "";
@@ -78,6 +78,9 @@ class fetcher {
 
         $userfields = \user_picture::fields('u', array('username'));
 
+        $companyusers = "";
+        $companyselect = "";
+
         // Add this to the SQL to show only group users.
         if ($currentgroup !== null) {
             $groupmembers = ", {groups_members} gm";
@@ -88,23 +91,30 @@ class fetcher {
             $params['currentgroup'] = $currentgroup;
         }
 
+        // Add this to the SQL to show only company users.
+        if ($companyid != 0) {
+            $companyusers = ", {company_users} cu";
+            $companyselect = "AND u.id = cu.userid AND cu.companyid = :companyid";
+            $params['companyid'] = $companyid;
+        }
+
         $params['now'] = $now;
         $params['timefrom'] = $timefrom;
         if ($sitelevel) {
             $sql = "SELECT $userfields $lastaccess
-                      FROM {user} u $groupmembers
+                      FROM {user} u $groupmembers $companyusers
                      WHERE u.lastaccess > :timefrom
                            AND u.lastaccess <= :now
                            AND u.deleted = 0
-                           $groupselect $groupby
+                           $groupselect $companyselect $groupby
                   ORDER BY lastaccess DESC ";
 
             $csql = "SELECT COUNT(u.id)
-                      FROM {user} u $groupmembers
+                      FROM {user} u $groupmembers $companyusers
                      WHERE u.lastaccess > :timefrom
                            AND u.lastaccess <= :now
                            AND u.deleted = 0
-                           $groupselect";
+                           $groupselect $companyselect";
 
         } else {
             // Course level - show only enrolled users for now.

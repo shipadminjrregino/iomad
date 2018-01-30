@@ -90,6 +90,8 @@ class manager {
             // as the main storage of data and put references to $_SESSION.
             $GLOBALS['USER'] = $_SESSION['USER'];
             $_SESSION['USER'] =& $GLOBALS['USER'];
+            $GLOBALS['COMPANY'] = $_SESSION['COMPANY'];
+            $_SESSION['COMPANY'] =& $GLOBALS['COMPANY'];
             $GLOBALS['SESSION'] = $_SESSION['SESSION'];
             $_SESSION['SESSION'] =& $GLOBALS['SESSION'];
 
@@ -167,6 +169,9 @@ class manager {
         $GLOBALS['USER'] = new \stdClass();
         $GLOBALS['USER']->id = 0;
 
+        $GLOBALS['COMPANY'] = new \stdClass();
+        $GLOBALS['COMPANY']->id = 0;
+
         if (!empty($notifications)) {
             // Restore notifications.
             $GLOBALS['SESSION']->notifications = $notifications;
@@ -181,6 +186,7 @@ class manager {
         // Link global $USER and $SESSION.
         $_SESSION = array();
         $_SESSION['USER'] =& $GLOBALS['USER'];
+        $_SESSION['COMPANY'] =& $GLOBALS['COMPANY'];
         $_SESSION['SESSION'] =& $GLOBALS['SESSION'];
     }
 
@@ -720,6 +726,17 @@ class manager {
         // Init session key.
         sesskey();
     }
+
+    /**
+     * Set current company.
+     *
+     * @param \stdClass $company record
+     */
+    public static function set_company(\stdClass $company) {
+        $GLOBALS['COMPANY'] = $company;
+        $_SESSION['COMPANY'] =& $GLOBALS['COMPANY'];
+    }
+
 
     /**
      * Periodic timed-out session cleanup.

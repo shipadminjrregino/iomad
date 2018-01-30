@@ -83,6 +83,7 @@ if (!empty($SESSION->has_timed_out)) {
 /// auth plugins may override these - SSO anyone?
 $frm  = false;
 $user = false;
+$company = false;
 
 $authsequence = get_enabled_auth_plugins(true); // auths, in sequence
 foreach($authsequence as $authname) {
@@ -160,8 +161,9 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
             // Used for validating user if url is company issued
             // Users can only login with their own issued company url
             $company = company::get_company_byhostname($hostname);
+            $companyid = $company ? $company->id : 0;
             $failurereason = null;
-            $user = authenticate_user_login($frm->username, $frm->password, false, $failurereason, $company->id);
+            $user = authenticate_user_login($frm->username, $frm->password, false, $failurereason, $companyid);
         }
     }
 
@@ -205,6 +207,10 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
         complete_user_login($user);
 
         \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
+
+        if ($company) {
+            \core\session\manager::set_company($company);
+        }
 
         // sets the username cookie
         if (!empty($CFG->nolastloggedin)) {
@@ -392,8 +398,9 @@ if (isloggedin() and !isguestuser()) {
     // Get company data from url
     // Used for customizing the site by issued company url
     $company = company::get_company_byhostname($hostname);
+    $companyname = $company ? $company->name : null;
 
-    $loginform = new \core_auth\output\login($authsequence, $frm->username, $company->name);
+    $loginform = new \core_auth\output\login($authsequence, $frm->username, $companyname);
     $loginform->set_error($errormsg);
     echo $OUTPUT->render($loginform);
 }
